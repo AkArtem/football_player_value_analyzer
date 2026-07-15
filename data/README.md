@@ -9,3 +9,9 @@ Files used in project:
 - competitions.csv
 
 Not committed due to file size.
+
+# Data changes
+
+- Dataset auto-updates weekly from Transfermarkt (source: dcaribou/transfermarkt-datasets). Data taken 2026-07-11
+- Removed 15 rows from `transfers.csv`(data with transfer_date after 2026-07-01)
+- Target variable: player market value matched to the end of the last completed season
