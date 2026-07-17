@@ -21,3 +21,5 @@ Not committed due to file size.
 # Data quality note
 Player valuation freshness varies significantly (median: 2.7 years since last update)
 Analysis is focused on players with a valuation update within the last 12 months, to ensure current-value estimates reflect active market pricing
+
+Excluded 390(6.5% of fresh players stats) players with valuation but no appearance data in dataset
