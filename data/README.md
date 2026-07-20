@@ -23,3 +23,15 @@ Player valuation freshness varies significantly (median: 2.7 years since last up
 Analysis is focused on players with a valuation update within the last 12 months, to ensure current-value estimates reflect active market pricing
 
 Excluded 390(6.5% of fresh players stats) players with valuation but no appearance data in dataset
+
+# Leakage fix
+
+Perfomance stats from appearances.csv iclude appearances recorded after each players valuation date, so future performance infuence value that was already set in the past
+
+- 3406 of 5613 fresh players affected, median leakage 150 days, max 378 days
+Examples of impact (total goals: before -> after fix):
+- Harry Kane: 414 -> 382
+- Erling Haaland: 259 -> 237
+- Ousmane Dembélé: 121 -> 102
+
+No players lost entirely (0 players with total_minutes == 0 after filtering). Final dataset: 5585 players
