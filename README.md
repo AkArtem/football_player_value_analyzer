@@ -1,0 +1,113 @@
+# Football Player Value Analyzer
+
+Identifying over/undervalued football players by comparing their actual market value to what a model predicts based on their performance stats.
+
+# Overview
+
+I take performance stats (goals, assists, minutes played, age, position) and try to predict a player's market value from that.
+Then, take a look at the difference between the actual value and the predicted value (residual), a big negative 
+residual means the player is probably undervalued relative to their stats, a big positive one means overvalued.
+This project demonstrates data cleaning, SQL, exploratory analysis, and modeling on a real-world, imperfect football dataset. This is the current value analysis, not future season, and the target is each player latest available market value, within last 365 days updated.
+
+# Data
+
+Source: [davidcariboo/player-scores](https://www.kaggle.com/datasets/davidcariboo/player-scores) on Kaggle, scraped from Transfermarkt, auto-updated weekly.
+Raw CSVs aren't committed here because of file size — see [data/README.md](data/README.md) for which files you need and how to set them up.
+
+### Data problems found and fixed
+
+This dataset required significant cleaning before it could be used reliably. 
+Full details in [data/README.md](data/README.md), summarized here:
+
+- **Valuation staleness:** median time since last valuation update across all players is ~2.7 years; 81% of records are older than 12 months. Analysis is restricted to players with a valuation update within the last 365 days.
+- **Missing appearance data:** 390 players (6.5%) had a valuation but no match appearance records — excluded from the feature set.
+- **Temporal data leakage:** the initial feature aggregation included match appearances recorded after each    player's valuation date, meaning future performance was leaking into features meant to explain a past value. 
+Affected 3,406 of 5,613 players (61%), with a median leakage window of 150 days (max 378 days). 
+Fixed by filtering each player's appearance stats to only include matches before their individual valuation date.
+Final analysis dataset after cleaning: **5,585 players**.
+
+## Tech Stack
+
+- Python: pandas, numpy, scipy, scikit-learn, matplotlib, seaborn, Streamlit
+- SQL: sqlite3 (in-memory), queries in `sql/`
+- Git/GitHub
+
+## Repository Structure
+
+notebooks/ — data cleaning, leakage fix, SQL queries, EDA, modeling
+sql/ — SQL queries (JOINs, RANK/DENSE_RANK, LAG)
+data/ — data docs (raw files not committed, see data/README.md)
+app/ — Streamlit dashboard 
+
+
+## Notebooks (in order)
+
+1. `01_data_overview.ipynb` — loading and checking all the raw tables
+2. `02_data_check.ipynb` — valuation freshness, current/peak value per player
+3. `03_features.ipynb` — first version of feature engineering (turned out to have the leakage bug)
+4. `04_sql.ipynb` — SQL queries: top scorers, per-90 stats, ranking by position, value change over time
+5. `05_check.ipynb` — found and fixed the temporal leakage, produced the final clean feature table
+6. `06_eda.ipynb` — exploratory analysis on the clean data
+7. `07_modeling.ipynb` — baselines, linear/lasso/ridge, random forest with CV and tuning, residual analysis
+
+## SQL
+
+All queries in `sql/`, run through sqlite3 from Python. Covers JOINs, aggregation, RANK()/DENSE_RANK() (ranking players within their position), and LAG() (tracking how a player's value changed over time).
+
+## Modeling results
+
+| Model | RMSE (log scale) | R² |
+|---|---|---|
+| Mean baseline | 1.72 | ~0.00 |
+| Median baseline | 1.75 | -0.03 |
+| Age-only | 1.72 | 0.01 |
+| Minutes-only | 1.67 | 0.07 |
+| Linear Regression (full features) | 1.41 | 0.33 |
+| Lasso | 1.41 | 0.33 |
+| Ridge | 1.41 | 0.33 |
+| **Random Forest (tuned)** | **1.12** | **0.58** |
+
+Random Forest with hyperparameter tuning was the best model. Feature 
+importance: `total_minutes` matters the most (0.45), age + age² together are 
+around 0.37, goals_per_90 and assists_per_90 are smaller (0.08 and 0.07), and 
+position barely matters at all (<0.01 each).
+
+## Residual analysis
+
+Residual = actual log(value) - predicted log(value). Negative means the model 
+thinks the player should be worth more than the market says (undervalued). 
+Positive means overvalued.
+
+Two patterns showed up in the biggest residuals:
+
+1. Young players (18-25) with almost no playing time get overvalued by the model — the market pays for potential/hype, which isn't in the data at all.
+2. Older players (25-33) with a lot of career minutes get undervalued by the model — total_minutes is the model's strongest feature, so it assumes lots of minutes means high value, but the real market already discounted them for age.
+
+Goalkeepers had the widest residual spread of any position — makes sense since 
+goals/assists per 90 barely mean anything for a keeper.
+
+## Known Limitations
+
+- Transfermarkt valuations are editorial estimates, not actual transaction prices.
+- The dataset does not capture contract length, injury history, or transfer demand — all of which affect real market value but aren't available as features.
+- Market value prediction is a well-studied problem; this project's ifferentiator is execution depth and data quality rigor (systematic leakage detection and correction, staleness-aware filtering), not methodological novelty.
+
+## How to run locally
+
+```bash
+git clone https://github.com/AkArtem/football_player_value_analyzer.git
+cd football_player_value_analyzer
+pip install -r requirements.txt
+```
+
+Download the dataset from Kaggle (see `data/README.md`), put the CSVs in 
+`data/`, then run the notebooks in order (01 → 07).
+
+Streamlit app (coming soon):
+```bash
+streamlit run app/streamlit_app.py
+```
+
+## License
+
+MIT
