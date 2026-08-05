@@ -1,0 +1,26 @@
+import streamlit as st
+import pandas as pd
+
+st.set_page_config(page_title="Football Player Value Analyzer", layout="wide")
+
+@st.cache_data
+def load_data():
+    return pd.read_csv('dashboard_data.csv')
+
+df = load_data()
+st.title("Football Player Value Analyzer")
+st.markdown("Identifying over/undervalued players via residual analysis of market value vs performance stats")
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Players analyzed", len(df))
+col2.metric("Avg market value", f"€{df['current_value'].mean():,.0f}")
+most_undervalued = df.loc[df['residual'].idxmin()]
+col3.metric("Most undervalued", most_undervalued['name'], f"residual: {most_undervalued['residual']:.2f}")
+col4.metric("Model R^2", "0.576")
+
+st.markdown("---")
+st.subheader("Model comparison")
+results_table = pd.DataFrame({
+    'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression', 'Random Forest (tuned)'],
+    'RMSE': [1.72, 1.67, 1.41, 1.12],
+    'R^2': [0.00, 0.07, 0.33, 0.58]})
+st.table(results_table)
