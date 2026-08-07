@@ -24,3 +24,4 @@ results_table = pd.DataFrame({
     'RMSE': [1.72, 1.67, 1.41, 1.12],
     'R^2': [0.00, 0.07, 0.33, 0.58]})
 st.table(results_table)
+st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€500K–€30M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
