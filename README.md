@@ -103,7 +103,7 @@ pip install -r requirements.txt
 Download the dataset from Kaggle (see `data/README.md`), put the CSVs in 
 `data/`, then run the notebooks in order (01 → 07).
 
-Streamlit app (coming soon):
+Streamlit app:
 ```bash
 streamlit run app/streamlit_app.py
 ```
