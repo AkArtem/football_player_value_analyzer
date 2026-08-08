@@ -4,14 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+st.set_page_config(layout="wide")
+
 @st.cache_data
 def load_data():
-    return pd.read_csv("../dashboard_data.csv")
+    return pd.read_csv("dashboard_data.csv")
 df = load_data()
 
 st.title("Exploratory Data Analysis")
 st.subheader("Market value distribution")
-st.set_page_config(layout="wide")
 col1, col2 = st.columns(2)
 with col1:
     fig, ax = plt.subplots(figsize=(6,4))

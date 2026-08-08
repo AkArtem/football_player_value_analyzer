@@ -2,9 +2,11 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+
+st.set_page_config(layout="wide")
 @st.cache_data
 def load_data():
-    return pd.read_csv('../dashboard_data.csv')
+    return pd.read_csv('dashboard_data.csv')
 
 df = load_data()
 st.sidebar.header("Filters")
@@ -14,7 +16,7 @@ min_minutes = st.sidebar.number_input("Minimum minutes played", min_value=0, val
 
 mask = (df['position'].isin(pos)) & (df['age'].between(min_age, max_age)) & (df['total_minutes'] >= min_minutes)
 df_f = df[mask].reset_index(drop=True)
-st.set_page_config(layout="wide")
+
 st.title("Undervalued / Overvalued Players")
 st.markdown(f"Showing **{len(df_f)}** players (filtered from {len(df)} total)")
 N = st.sidebar.slider("Top N", 5, 50, 10)
