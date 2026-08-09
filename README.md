@@ -2,6 +2,8 @@
 
 Identifying over/undervalued football players by comparing their actual market value to what a model predicts based on their performance stats.
 
+
+**[Live Demo](https://football-value-analyzer.streamlit.app/)**
 # Overview
 
 I take performance stats (goals, assists, minutes played, age, position) and try to predict a player's market value from that.
