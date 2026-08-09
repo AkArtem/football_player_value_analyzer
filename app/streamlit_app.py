@@ -45,9 +45,9 @@ col4.metric("Model R^2", "0.61")
 st.markdown("---")
 st.subheader("Model comparison")
 results_table = pd.DataFrame({
-    'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression', 'Random Forest (tuned)'],
-    'RMSE': [1.72, 1.67, 1.41, 1.12],
-    'R^2': [0.00, 0.07, 0.33, 0.61]})
+    'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression with recent stats', 'Tuned Random Forest with recent stats'],
+    'RMSE': [1.72, 1.67, 1.22, 1.07],
+    'R^2': [-0.00, 0.07, 0.50, 0.61]})
 st.table(results_table)
 st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€400K–€20M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
 st.subheader("Notable players in this dataset")
