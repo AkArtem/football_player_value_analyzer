@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
+import os
 
 st.set_page_config(page_title="Football Player Value Analyzer", layout="wide")
 
 @st.cache_data
 def load_data():
-    return pd.read_csv('dashboard_data.csv')
+    csv_path = os.path.join(os.path.dirname(__file__), 'dashboard_data.csv')
+    return pd.read_csv(csv_path)
 
 df = load_data()
 st.title("Football Player Value Analyzer")

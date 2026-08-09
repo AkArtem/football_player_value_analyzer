@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,7 +6,8 @@ import numpy as np
 st.set_page_config(layout="wide")
 @st.cache_data
 def load_data():
-    return pd.read_csv('dashboard_data.csv')
+    csv_path = os.path.join(os.path.dirname(__file__), 'dashboard_data.csv')
+    return pd.read_csv(csv_path)
 
 df = load_data()
 st.title("Player Search")
