@@ -65,12 +65,11 @@ All queries in `sql/`, run through sqlite3 from Python. Covers JOINs, aggregatio
 | Linear Regression (full features) | 1.41 | 0.33 |
 | Lasso | 1.41 | 0.33 |
 | Ridge | 1.41 | 0.33 |
-| **Random Forest (tuned)** | **1.12** | **0.58** |
+| **Tuned Random Forest (recent stats + league tier)** | **1.07** | **0.61** |
 
-Random Forest with hyperparameter tuning was the best model. Feature 
-importance: `total_minutes` matters the most (0.45), age + age² together are 
-around 0.37, goals_per_90 and assists_per_90 are smaller (0.08 and 0.07), and 
-position barely matters at all (<0.01 each).
+Tuned Random Forest with recent stats + league tier is the best model. Feature 
+importance still shows playing time as dominant, but recency and market-tier 
+signals improve overall fit and reduce top-end underprediction versus the base model.
 
 ## Residual analysis
 
@@ -90,7 +89,7 @@ goals/assists per 90 barely mean anything for a keeper.
 
 - Transfermarkt valuations are editorial estimates, not actual transaction prices.
 - The dataset does not capture contract length, injury history, or transfer demand — all of which affect real market value but aren't available as features.
-- Market value prediction is a well-studied problem; this project's ifferentiator is execution depth and data quality rigor (systematic leakage detection and correction, staleness-aware filtering), not methodological novelty.
+- Market value prediction is a well-studied problem; this project's differentiator is execution depth and data quality rigor (systematic leakage detection and correction, staleness-aware filtering), not methodological novelty.
 
 ## How to run locally
 
