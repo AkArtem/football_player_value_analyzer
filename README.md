@@ -26,7 +26,7 @@ Full details in [data/README.md](data/README.md), summarized here:
 - **Temporal data leakage:** the initial feature aggregation included match appearances recorded after each    player's valuation date, meaning future performance was leaking into features meant to explain a past value. 
 Affected 3,406 of 5,613 players (61%), with a median leakage window of 150 days (max 378 days). 
 Fixed by filtering each player's appearance stats to only include matches before their individual valuation date.
-Final analysis dataset after cleaning: **5,585 players**.
+Final analysis dataset after cleaning: **4,816 players**.
 
 ## Tech Stack
 
@@ -60,14 +60,14 @@ All queries in `sql/`, run through sqlite3 from Python. Covers JOINs, aggregatio
 
 | Model | RMSE (log scale) | R² |
 |---|---|---|
-| Mean baseline | 1.72 | ~0.00 |
-| Median baseline | 1.75 | -0.03 |
-| Age-only | 1.72 | 0.01 |
-| Minutes-only | 1.67 | 0.07 |
-| Linear Regression (full features) | 1.41 | 0.33 |
-| Lasso | 1.41 | 0.33 |
-| Ridge | 1.41 | 0.33 |
-| **Tuned Random Forest (recent stats + league tier)** | **1.07** | **0.61** |
+| Mean baseline | 1.686 | -0.0004 |
+| Median baseline | 1.689 | -0.0041 |
+| Age-only | 1.600 | 0.0988 |
+| Minutes-only | 1.640 | 0.0541 |
+| Linear Regression (full features) | 1.206 | 0.4885 |
+| Lasso | 1.217 | 0.4787 |
+| Ridge | 1.206 | 0.4887 |
+| **Tuned Random Forest (recent stats + league tier)** | **0.987** | **0.657** |
 
 Tuned Random Forest with recent stats + league tier is the best model. Feature 
 importance still shows playing time as dominant, but recency and market-tier 
