@@ -15,7 +15,7 @@ st.markdown("Identifying over/undervalued players via residual analysis of marke
 
 st.sidebar.header("Filters")
 
-min_value = st.sidebar.number_input("Minimum market value (€)", min_value=0, value=400000, step=100000, max_value=220000000)
+min_value = st.sidebar.number_input("Minimum market value (€)", min_value=0, value=400000, step=100000, max_value=300000000)
 max_value = st.sidebar.number_input("Maximum market value (€)", min_value=0, value=20000000, step=1000000, max_value=300000000)
 
 positions = sorted(df["position"].dropna().unique().tolist())
@@ -40,14 +40,14 @@ col1.metric("Players analyzed", len(filtered))
 col2.metric("Avg market value", f"€{filtered['current_value'].mean():,.0f}")
 most_undervalued = filtered.loc[filtered['residual'].idxmin()]
 col3.metric("Most undervalued", most_undervalued['name'], f"residual: {most_undervalued['residual']:.2f}")
-col4.metric("Model R^2", "0.6122")
+col4.metric("Model R^2", "0.6570")
 
 st.markdown("---")
 st.subheader("Model comparison")
 results_table = pd.DataFrame({
     'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression with recent stats', 'Tuned Random Forest with recent stats'],
-    'RMSE': [1.7246, 1.6657, 1.2153, 1.0740],
-    'R^2': [-0.0000, 0.0672, 0.5034, 0.6122]})
+    'RMSE': [1.6862, 1.6397, 1.0630, 0.9874],
+    'R^2': [-0.0004, 0.0541, 0.6024, 0.6570]})
 st.table(results_table)
 st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€400K–€20M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
 st.subheader("Notable players in this dataset")
