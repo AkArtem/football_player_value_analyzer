@@ -12,7 +12,7 @@ This project demonstrates data cleaning, SQL, exploratory analysis, and modeling
 
 # Key Results
 - **4,816 players** analyzed after data cleaning
-- **Random Forest (tuned):** R²=0.657, RMSE=0.987 — vs R²≈0 for baseline
+- **Random Forest (tuned):** R^2=0.715, RMSE=0.875 vs R^2=0 for baseline
 - Found and fixed temporal data leakage affecting 61% of players
 - Live interactive dashboard deployed on Streamlit Cloud
 

@@ -46,7 +46,7 @@ st.markdown("---")
 st.subheader("Model comparison")
 results_table = pd.DataFrame({
     'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression with recent stats', 'Tuned Random Forest with recent stats'],
-    'RMSE': [1.6553, 1.6183, 0.9181, 1.8748],
+    'RMSE': [1.6553, 1.6183, 0.9181, 0.8748],
     'R^2': [-0.0212, 0.0239, 0.6858, 0.7148]})
 st.table(results_table)
 st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€400K–€20M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
