@@ -89,8 +89,8 @@ Model selection happened in two stages: a broad comparison of baselines and line
 |---|---|---|
 | Mean baseline | 1.655 | -0.021 |
 | Minutes-only | 1.618 | 0.024 |
-| Linear Regression | 1.108 | 0.543 |
-| **Tuned Random Forest** | **1.040** | **0.597** |
+| Linear Regression | 0.918 | 0.686 |
+| **Tuned Random Forest** | **0.875** | **0.715** |
 
 Tuned Random Forest with recency-weighted stats + league tier is the best model, and it's what's deployed in the live app: `predicted_log_value`/`residual` in `dashboard_data.csv` are exactly these out-of-fold predictions, so the numbers above reflect what you'll actually see when you use the dashboard. Feature importance still shows playing time as dominant, but recency and market-tier signals improve overall fit and reduce top-end underprediction versus the base model.
 
