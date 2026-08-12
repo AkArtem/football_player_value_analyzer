@@ -40,14 +40,14 @@ col1.metric("Players analyzed", len(filtered))
 col2.metric("Avg market value", f"€{filtered['current_value'].mean():,.0f}")
 most_undervalued = filtered.loc[filtered['residual'].idxmin()]
 col3.metric("Most undervalued", most_undervalued['name'], f"residual: {most_undervalued['residual']:.2f}")
-col4.metric("Model R^2", "0.6570")
+col4.metric("Model R^2", "0.5973")
 
 st.markdown("---")
 st.subheader("Model comparison")
 results_table = pd.DataFrame({
     'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression with recent stats', 'Tuned Random Forest with recent stats'],
-    'RMSE': [1.6862, 1.6397, 1.0630, 0.9874],
-    'R^2': [-0.0004, 0.0541, 0.6024, 0.6570]})
+    'RMSE': [1.6553, 1.6183, 1.1079, 1.0395],
+    'R^2': [-0.0212, 0.0239, 0.5425, 0.5973]})
 st.table(results_table)
 st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€400K–€20M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
 st.subheader("Notable players in this dataset")
