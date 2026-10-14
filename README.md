@@ -11,7 +11,7 @@ I take performance stats (goals, assists, minutes played, age, position) and try
 This project demonstrates data cleaning, SQL, exploratory analysis, and modeling on a real-world, imperfect football dataset. This is a current value analysis, not a forecast of future seasons. The target is each player's latest available market value, updated within the last 365 days.
 
 # Key Results
-- **4,816 players** analyzed after data cleaning
+- **4,816 players** analyzed after data cleaning vs 50149 in players.csv
 - **Random Forest (tuned):** R^2=0.715, RMSE=0.875 vs R^2=0 for baseline
 - Found and fixed temporal data leakage affecting 61% of players
 - Live interactive dashboard deployed on Streamlit Cloud

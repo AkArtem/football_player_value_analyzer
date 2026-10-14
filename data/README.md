@@ -30,10 +30,6 @@ Excluded 390 (6.5% of fresh players) players with a valuation but no appearance 
 Performance stats from appearances.csv included appearances recorded after each player's valuation date, so future performance was influencing a value that was already set in the past.
 
 - 3406 of 5613 fresh players affected, median leakage 150 days, max 378 days
-Examples of impact (total goals: before -> after fix):
-- Harry Kane: 414 -> 382
-- Erling Haaland: 259 -> 237
-- Ousmane Dembélé: 121 -> 102
 
 No players lost entirely to the leakage fix (0 players with total_minutes == 0 after filtering).
 
