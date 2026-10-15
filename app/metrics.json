@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "n_players": 4816,
+  "cv_r2": 0.746,
+  "cv_rmse": 0.826,
+  "holdout_r2": 0.765,
+  "best_params": {
+    "n_estimators": 200,
+    "min_samples_leaf": 4,
+    "max_depth": 10
+  },
+  "models": [
+    {
+      "Model": "Mean baseline",
+      "RMSE": 1.638,
+      "R^2": -0.001
+    },
+    {
+      "Model": "Minutes-only",
+      "RMSE": 1.602,
+      "R^2": 0.044
+    },
+    {
+      "Model": "Linear Regression with recent stats",
+      "RMSE": 0.879,
+      "R^2": 0.712
+    },
+    {
+      "Model": "Tuned Random Forest with recent stats",
+      "RMSE": 0.826,
+      "R^2": 0.746
+    }
+  ]
+}
