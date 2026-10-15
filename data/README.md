@@ -8,15 +8,14 @@ Files used in project:
 - games.csv
 - competitions.csv
 - clubs.csv
-- transfers.csv
 
 Not committed due to file size.
 
-# Data changes
+# Data snapshot
 
-- Dataset auto-updates weekly from Transfermarkt (source: dcaribou/transfermarkt-datasets). Data taken 2026-07-11
-- Removed 15 rows from `transfers.csv` (data with transfer_date after 2026-07-01)
-- Target variable: each player's latest available market value, using valuations updated within the last 365 days — not a season-end or future-season prediction
+- Downloaded from Kaggle on 2026-07-11. The upstream project (dcaribou/transfermarkt-datasets) has paused updates, so this is the final available snapshot.
+- Latest match in the data: 2026-07-06. Latest market valuation: 2026-02-27.
+- Target variable: each player's latest available market value, using valuations updated within the last 365 days, not a season-end or future-season prediction.
 
 # Data quality note
 
@@ -31,7 +30,7 @@ Performance stats from appearances.csv included appearances recorded after each 
 
 - 3406 of 5613 fresh players affected, median leakage 150 days, max 378 days
 
-No players lost entirely to the leakage fix (0 players with total_minutes == 0 after filtering).
+28 players had all of their appearances after their valuation date and were dropped (5,613 → 5,585).
 
 # Low-minutes noise filter
 
@@ -42,5 +41,4 @@ Final dataset after all cleaning steps: **4,816 players**.
 
 # Modeling notes
 
-Final model uses recency-weighted stats (last 1-2 seasons instead of full career) and a league/country tier feature, in addition to age, age², total minutes
-and position. See main README for model comparison table and results.
+Final model features: age, age^2, total career minutes and position, plus recent form (minutes, goals and assists per 90 in the 365 days before each player's valuation) and league tier (tier of the player's main domestic league, mapped by competition_id in src/features.py). See the main README for the model comparison table and results.
