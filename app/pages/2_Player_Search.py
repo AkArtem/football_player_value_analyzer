@@ -1,12 +1,10 @@
-import os
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import load_data, load_metrics
-df = load_data()
-
+from utils import load_data
 
 st.set_page_config(layout="wide")
+df = load_data()
 
 
 st.title("Player Search")

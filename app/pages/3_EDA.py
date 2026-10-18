@@ -3,8 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
-from utils import load_data, load_metrics
+from utils import load_data
 st.set_page_config(layout="wide")
 
 df = load_data()

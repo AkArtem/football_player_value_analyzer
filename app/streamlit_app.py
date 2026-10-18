@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 from utils import load_data, load_metrics
 
+st.set_page_config(page_title="Football Player Value Analyzer", layout="wide")
+
 df = load_data()
 m = load_metrics()
-
-st.set_page_config(page_title="Football Player Value Analyzer", layout="wide")
 
 st.title("Football Player Value Analyzer")
 st.markdown("Identifying over/undervalued players via residual analysis of market value vs performance stats")
