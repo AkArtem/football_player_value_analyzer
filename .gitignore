@@ -2,3 +2,4 @@ data/*.csv
 .venv
 __pycache__/
 docs/
+app/model.pkl
