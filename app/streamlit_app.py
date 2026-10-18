@@ -1,15 +1,12 @@
 import streamlit as st
 import pandas as pd
-import os
+from utils import load_data, load_metrics
+
+df = load_data()
+m = load_metrics()
 
 st.set_page_config(page_title="Football Player Value Analyzer", layout="wide")
 
-@st.cache_data
-def load_data():
-    csv_path = os.path.join(os.path.dirname(__file__), 'dashboard_data.csv')
-    return pd.read_csv(csv_path)
-
-df = load_data()
 st.title("Football Player Value Analyzer")
 st.markdown("Identifying over/undervalued players via residual analysis of market value vs performance stats")
 
@@ -40,15 +37,13 @@ col1.metric("Players analyzed", len(filtered))
 col2.metric("Avg market value", f"€{filtered['current_value'].mean():,.0f}")
 most_undervalued = filtered.loc[filtered['residual'].idxmin()]
 col3.metric("Most undervalued", most_undervalued['name'], f"residual: {most_undervalued['residual']:.2f}")
-col4.metric("Model R^2", "0.715")
+col4.metric("Model R^2", f"{m['cv_r2']:.3f}")
 
 st.markdown("---")
 st.subheader("Model comparison")
-results_table = pd.DataFrame({
-    'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression with recent stats', 'Tuned Random Forest with recent stats'],
-    'RMSE': [1.6553, 1.6183, 0.9181, 0.8748],
-    'R^2': [-0.0212, 0.0239, 0.6858, 0.7148]})
-st.table(results_table)
+st.table(pd.DataFrame(m["models"]))
+st.caption(f"Final model: tuned Gradient Boosting. Hold-out R² = {m['holdout_r2']:.3f}. Data snapshot: {m['date']}.")
+
 st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€400K–€20M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
 st.subheader("Notable players in this dataset")
 featured_names = ["Erling Haaland", "Jude Bellingham", "Harry Kane", "Federico Valverde"]

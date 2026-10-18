@@ -4,13 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-
+from utils import load_data, load_metrics
 st.set_page_config(layout="wide")
-
-@st.cache_data
-def load_data():
-    csv_path = os.path.join(os.path.dirname(__file__), 'dashboard_data.csv')
-    return pd.read_csv(csv_path)
 
 df = load_data()
 st.title("Exploratory Data Analysis")
