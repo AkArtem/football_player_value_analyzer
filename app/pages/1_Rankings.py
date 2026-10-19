@@ -1,9 +1,8 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import load_data, DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE, DEFAULT_RECENT_MINUTES
+from utils import load_data, fmt_eur, DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE, DEFAULT_RECENT_MINUTES
 
-st.set_page_config(layout="wide")
 df = load_data()
 
 stable_only = st.sidebar.checkbox("Hide unstable predictions (residual_std > 0.15)", value=True)
@@ -24,28 +23,30 @@ if stable_only:
     mask = mask & (df['residual_std'] <= 0.15)
 df_f = df[mask].reset_index(drop=True)
 
-st.title("Undervalued / Overvalued Players")
+st.title("Market value vs stats-based estimate")
 st.markdown(f"Showing **{len(df_f)}** players (filtered from {len(df)} total). "
-            "*Predicted* = what the stats suggest, *Pct in price group* = rank among players of similar price (0% = most undervalued).")
+            "*Estimate* = what the stats suggest, *Pct in price group* = rank among players of similar price (0% = biggest gap below the estimate), "
+            "*Note* = reasons the estimate may be off.")
 N = st.sidebar.slider("Top N", 5, 50, 10)
 cols = {'name': 'Player', 'position': 'Position', 'age': 'Age', 'current_value': 'Market value',
-        'pred_eur': 'Predicted', 'residual': 'Residual', 'residual_std': 'Stability (std)',
+        'pred_eur': 'Estimate', 'note': 'Note', 'residual': 'Residual', 'residual_std': 'Stability (std)',
         'pct_in_group': 'Pct in price group'}
-fmt = {'Age': '{:.1f}', 'Market value': '€{:,.0f}', 'Predicted': '€{:,.0f}',
+fmt = {'Age': '{:.1f}', 'Market value': fmt_eur, 'Estimate': fmt_eur,
        'Residual': '{:.2f}', 'Stability (std)': '{:.2f}', 'Pct in price group': '{:.0%}'}
-col1, col2 = st.columns(2)
+show_cols = ['name', 'current_value', 'pred_eur', 'residual', 'note', 'position', 'age', 'pct_in_group', 'residual_std']
+tab1, tab2 = st.tabs(["Below the estimate", "Above the estimate"])
 df_f["pred_eur"] = np.expm1(df_f["predicted_log_value"]).round(0).astype(int)
-with col1:
-    st.subheader(f"Most undervalued (top {N})")
-    underv = df_f.sort_values('residual').head(N)[['name', 'position', 'age', 'current_value', 'residual', 'pred_eur', 'residual_std', 'pct_in_group']]
+with tab1:
+    st.subheader(f"Below the estimate (top {N})")
+    underv = df_f.sort_values('residual').head(N)[show_cols]
     st.dataframe(underv.rename(columns=cols).style.format(fmt), width='stretch', hide_index=True)
 
-with col2:
-    st.subheader(f"Most overvalued (top {N})")
-    over = df_f.sort_values('residual', ascending=False).head(N)[['name', 'position', 'age', 'current_value', 'residual', 'pred_eur', 'residual_std', 'pct_in_group']]
+with tab2:
+    st.subheader(f"Above the estimate (top {N})")
+    over = df_f.sort_values('residual', ascending=False).head(N)[show_cols]
     st.dataframe(over.rename(columns=cols).style.format(fmt), width='stretch', hide_index=True)
 
-st.caption("Big positive residuals usually mean the market knows something that is not in the data: "
+st.caption("A big gap does not mean the market is wrong. Big positive residuals usually mean the market knows something that is not in the data: "
            "a recent transfer from a league that the dataset does not cover (so career minutes look low), a comeback from injury, or youth potential.")
 
 st.header("Residuals scatter")

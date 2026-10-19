@@ -16,8 +16,8 @@ This project demonstrates data cleaning, SQL, exploratory analysis, and modeling
 
 # Key Results
 - **4,816 players** analyzed after data cleaning vs 50149 in players.csv
-- **Gradient Boosting (tuned):** out-of-fold R² = 0.763, RMSE = 0.798 (log scale) vs R² ≈ 0 for the mean baseline; R² = 0.783 on an untouched 20% hold-out
-- Rankings are robust: changing the freshness cutoff (90–540 days) changes the residual ranking no more than re-running cross-validation with another seed (Spearman ≈ 0.98)
+- **Gradient Boosting (tuned):** out-of-fold R² = 0.763, RMSE = 0.798 (log scale) vs R² ≈ 0 for the mean baseline; R² = 0.783 on a 20% hold-out not used for tuning
+- Robustness checks: residuals averaged over 5 CV seeds with a per-player stability score; changing the freshness cutoff (90–540 days) changes residual ranks no more than CV noise
 - Feature logic covered by unit tests (pytest, run on every push with GitHub Actions)
 - Live interactive dashboard deployed on Streamlit Cloud
 
@@ -102,7 +102,7 @@ Model selection happened in two stages: a broad comparison of baselines and line
 | Tuned Random Forest | 0.826 | 0.746 |
 | **Tuned Gradient Boosting** | **0.798** | **0.763** |
 
-Tuned Gradient Boosting (500 trees, depth 3, learning rate 0.03) is the final model. On an untouched 20% hold-out it reaches R² = 0.783. Compared with Random Forest it also reduces the underprediction of the most expensive players (mean residual of the top-100 most valuable players +0.52 vs +0.70). All numbers come from `app/metrics.json`, which the dashboard reads directly.
+Tuned Gradient Boosting (500 trees, depth 3, learning rate 0.03) is the final model. On a 20% hold-out that was not used for tuning it reaches R² = 0.783 (the hold-out was used once to compare the final candidates, so it is not a fully untouched test set). Compared with Random Forest it also reduces the underprediction of the most expensive players (mean residual of the top-100 most valuable players +0.50 vs +0.70). All numbers come from `app/metrics.json`, which the dashboard reads directly.
 
 An RMSE of 0.8 on the log scale means a typical prediction is off by a factor of about 2.2, so the model is meant for ranking players against their stats, not for exact prices.
 
@@ -110,31 +110,29 @@ Permutation importance on the hold-out set: league tier (0.35), total minutes (0
 
 ## Robustness
 
-- **Freshness cutoff:** rebuilding the dataset with 90/180/540-day cutoffs instead of 365 and comparing residuals on common players gives Spearman 0.975–0.980 - the same as re-running the 365-day model with another CV seed (0.979). The cutoff does not drive the ranking (`08_sensitivity.ipynb`).
+- **Freshness cutoff:** the 90–540-day datasets share 94–100% of players with the 365-day one (most valuations in the snapshot are from December 2025), so the cutoff barely changes the sample. On common players, residual ranks agree with Spearman 0.975–0.980 — the same as re-running the 365-day model with another CV seed (0.979) (`08_sensitivity.ipynb`). This shows the choice of 365 days is not critical; it is not a test on a different population.
 - **CV randomness:** residuals in the dashboard are averaged over 5 different CV splits. `residual_std` shows how much a player's prediction moves between splits (mean 0.08); the dashboard can hide the ~6% of players with residual_std > 0.15.
 
 ## Residual analysis
 
 Residual = actual log(value) - predicted log(value). Negative means the model thinks the player should be worth more than the market says (undervalued). Positive means overvalued.
 
-Two patterns showed up in the biggest residuals:
+Patterns in the biggest residuals:
 
-1. Young players (18-25) with almost no playing time get overvalued by the model - the market pays for potential/hype, which isn't in the data at all.
-2. Older players (25-33) with a lot of career minutes get undervalued by the model - total_minutes is the model's strongest feature, so it assumes lots of minutes means high value, but the real market already discounted them for age.
+1. **Market value far above the estimate:** mostly young players (median age of the top 30: 24.5) with very few recent minutes in the data (median 329). The market pays for potential, which isn't in the data. Long injuries look the same: Rodri or Musiala missed most of a season, so the model sees few recent minutes, while the market knows they will come back. Players who recently arrived from a league the dataset does not cover (Gerson, Ardon Jashari) also land here.
+2. **Market value far below the estimate:** mostly cheap players (median value of the top 30: €100K, median age 23.5) with relatively few career minutes; 18 of the 30 play in tier-1 (smaller) leagues. Their stats look decent, but their price is at the bottom of the range.
+3. **By position** there is no systematic bias (median residual between −0.06 and −0.02), and goalkeepers have the smallest spread (std 0.73 vs 0.79–0.81).
 
-Goalkeepers had the widest residual spread of any position, makes sense since goals/assists per 90 barely mean anything for a keeper.
-
-3. Long injuries: players like Rodri or Musiala, who missed most of a season, look "overvalued" because they have few recent minutes - the market knows they will come back, the model doesn't.
-
-Residuals also depend on price level (regression to the mean): cheap players have negative residuals on average and expensive players positive ones. That's why the dashboard also shows each player's percentile **within his price group**.
+Residuals also depend on price level (regression to the mean): cheap players have negative residuals on average and expensive players positive ones (from −1.11 under €100K to +0.50 over €50M). A negative residual for a cheap player is therefore not automatically a bargain, which is why the dashboard also shows each player's percentile **within his price group**.
 
 ## Known Limitations
 
 - Transfermarkt valuations are editorial estimates, not actual transaction prices.
-- The dataset does not capture contract length, injury history, or transfer demand, all of which affect real market value but aren't available as features.
+- Injury history and transfer demand are not in the data. `players.csv` does contain a contract expiry date, but only as of the snapshot date, not as of each valuation date, so I left it out to avoid using information from the future.
 - The dataset covers 14 European first divisions plus cups and European competitions. Minutes played in other leagues (e.g. Brazil, Switzerland, MLS) are missing, so players who recently moved from there look less experienced than they are and often appear "overvalued" (e.g. Gerson, Ardon Jashari).
 - Predictions are pulled towards the middle of the market: the cheapest players are systematically predicted too high and the most expensive too low.
-- Fixed data snapshot (July 2026); valuations are up to ~1 year old.
+- Fixed data snapshot (downloaded July 2026); 93% of the valuations used are from December 2025.
+- **Selection bias from the freshness filter:** part of the staleness comes from the dataset's scraper, not from Transfermarkt. For example, Mbappé, Vinícius Júnior and Lamine Yamal were last valued in mid-2024 in this dataset, so they are excluded, and only a minority of Real Madrid's and Barcelona's current squads pass the 365-day filter vs most of Manchester City's. The sample under-represents some top clubs.
 - Market value prediction is a well-studied problem; this project's differentiator is execution depth and data quality rigor (time-aware features, staleness-aware filtering, robustness checks), not methodological novelty.
 
 ## How to run locally

@@ -1,8 +1,7 @@
 import streamlit as st
 import numpy as np
-from utils import load_data, verdict, ELITE_VALUE
+from utils import load_data, verdict, flags, fmt_eur, ELITE_VALUE
 
-st.set_page_config(layout="wide")
 df = load_data()
 
 
@@ -17,12 +16,12 @@ if search_name:
             st.warning("This player is in the elite-value range. The model is less reliable above €40M, so treat this estimate as directional.")
         st.subheader(row['name'])
         col1, col2, col3 = st.columns(3)
-        col1.metric("Actual Value", f"€{row['current_value']:,.0f}")
-        col2.metric("Predicted Value", f"€{np.expm1(row['predicted_log_value']):,.0f}")
+        col1.metric("Market value", fmt_eur(row['current_value']))
+        col2.metric("Stats-based estimate", fmt_eur(np.expm1(row['predicted_log_value'])))
         col3.metric("Residual", f"{row['residual']:.2f}")
         
         st.write(f"**{verdict(row['residual'])}** · {row['pct_in_group']:.0%} percentile in price group {row['value_group']} · stability (std) {row['residual_std']:.2f}")
         st.write(f"Position: {row['position']}, Age: {row['age']:.1f}, Minutes last 12 months: {row['recent_minutes']:.0f}, Career minutes in dataset: {row['total_minutes']}")
-        if row['residual_std'] > 0.15:
-            st.caption("The prediction for this player changes a lot between CV splits, so treat it with caution.")
+        for note in flags(row):
+            st.caption(f"{note}")
         st.markdown("---")
