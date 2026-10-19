@@ -16,3 +16,20 @@ def load_data():
 def load_metrics():
     with open(os.path.join(APP_ROOT, "metrics.json")) as f:
         return json.load(f)
+
+DEFAULT_MIN_VALUE = 2_000_000
+DEFAULT_MAX_VALUE = 40_000_000
+DEFAULT_RECENT_MINUTES = 900
+ELITE_VALUE = 40_000_000
+
+
+def verdict(residual):
+    if residual <= -0.7:
+        return "Strongly undervalued by the market"
+    if residual <= -0.3:
+        return "Undervalued"
+    if residual < 0.3:
+        return "Fairly valued"
+    if residual < 0.7:
+        return "Overvalued"
+    return "Strongly overvalued by the market"
