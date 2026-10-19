@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-18",
+  "n_players": 4816,
+  "cv_r2": 0.763,
+  "cv_rmse": 0.798,
+  "holdout_r2": 0.783,
+  "best_params": {
+    "n_estimators": 500,
+    "min_samples_leaf": 5,
+    "max_depth": 3,
+    "learning_rate": 0.03
+  },
+  "models": [
+    {
+      "Model": "Mean baseline",
+      "RMSE": 1.638,
+      "R^2": -0.001
+    },
+    {
+      "Model": "Minutes-only",
+      "RMSE": 1.602,
+      "R^2": 0.044
+    },
+    {
+      "Model": "Linear Regression with recent stats",
+      "RMSE": 0.879,
+      "R^2": 0.712
+    },
+    {
+      "Model": "Tuned Random Forest with recent stats",
+      "RMSE": 0.826,
+      "R^2": 0.746
+    },
+    {
+      "Model": "Tuned Gradient Boosting with recent stats",
+      "RMSE": 0.798,
+      "R^2": 0.763
+    }
+  ],
+  "model": "GradientBoostingRegressor"
+}

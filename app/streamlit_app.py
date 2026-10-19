@@ -1,55 +1,55 @@
 import streamlit as st
 import pandas as pd
-import os
+from utils import load_data, load_metrics, DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE, DEFAULT_RECENT_MINUTES, ELITE_VALUE
 
 st.set_page_config(page_title="Football Player Value Analyzer", layout="wide")
 
-@st.cache_data
-def load_data():
-    csv_path = os.path.join(os.path.dirname(__file__), 'dashboard_data.csv')
-    return pd.read_csv(csv_path)
-
 df = load_data()
+m = load_metrics()
+
 st.title("Football Player Value Analyzer")
-st.markdown("Identifying over/undervalued players via residual analysis of market value vs performance stats")
+st.markdown("Which players are cheap or expensive **compared with what their stats suggest?** "
+            "A Gradient Boosting model predicts each player's Transfermarkt value from playing time, age, league level and recent form. "
+            "The gap between the real and the predicted value (the *residual*) shows who the market rates higher or lower than the stats do.")
 
 st.sidebar.header("Filters")
 
-min_value = st.sidebar.number_input("Minimum market value (€)", min_value=0, value=400000, step=100000, max_value=300000000)
-max_value = st.sidebar.number_input("Maximum market value (€)", min_value=0, value=20000000, step=1000000, max_value=300000000)
+min_value = st.sidebar.number_input("Minimum market value (€)", min_value=0, value=DEFAULT_MIN_VALUE, step=500000, max_value=300000000)
+max_value = st.sidebar.number_input("Maximum market value (€)", min_value=0, value=DEFAULT_MAX_VALUE, step=1000000, max_value=300000000)
 
 positions = sorted(df["position"].dropna().unique().tolist())
 selected_positions = st.sidebar.multiselect("Position", positions, default=positions)
 
 min_age, max_age =st.sidebar.slider("Age range", float(df["age"].min()), float(df["age"].max()),(18.0, 35.0))
 
-min_minutes = st.sidebar.number_input("Minimum minutes played", min_value=0, value=900, step=100)
+min_minutes = st.sidebar.number_input("Minimum minutes (last 12 months)", min_value=0, value=DEFAULT_RECENT_MINUTES, step=100)
 
-filtered = df[df["current_value"].between(min_value, max_value) & df["position"].isin(selected_positions) & df["age"].between(min_age, max_age) & (df["total_minutes"] >= min_minutes)].copy()
-st.info("This model works best in the broad mid-market. Extreme elite values are less reliable because brand, hype, contract situation, and league context are not fully captured in this dataset.")
+filtered = df[df["current_value"].between(min_value, max_value) & df["position"].isin(selected_positions) & df["age"].between(min_age, max_age) & (df["recent_minutes"] >= min_minutes)].copy()
+st.info("The model works best in the broad mid-market (about €1M–€40M). Elite values are less reliable because brand, hype, contracts and injuries are not in the data.")
 
 if len(filtered) == 0:
     st.warning("No players match selected filters")
     st.stop()
     
-if filtered["current_value"].max() > 20000000:
+if filtered["current_value"].max() > ELITE_VALUE:
     st.warning("Some selected players are in the high-value range, where predictions are less stable and reliable")
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Players analyzed", len(filtered))
 col2.metric("Avg market value", f"€{filtered['current_value'].mean():,.0f}")
 most_undervalued = filtered.loc[filtered['residual'].idxmin()]
-col3.metric("Most undervalued", most_undervalued['name'], f"residual: {most_undervalued['residual']:.2f}")
-col4.metric("Model R^2", "0.715")
+col3.metric("Most undervalued", most_undervalued['name'], f"residual {most_undervalued['residual']:.2f}", delta_color="off")
+col4.metric("Model R² (5-fold CV)", f"{m['cv_r2']:.3f}")
 
 st.markdown("---")
 st.subheader("Model comparison")
-results_table = pd.DataFrame({
-    'Model': ['Mean baseline', 'Minutes-only', 'Linear Regression with recent stats', 'Tuned Random Forest with recent stats'],
-    'RMSE': [1.6553, 1.6183, 0.9181, 0.8748],
-    'R^2': [-0.0212, 0.0239, 0.6858, 0.7148]})
-st.table(results_table)
-st.markdown("This tool is best suited for identifying value inefficiencies in the broad mid-market (€400K–€20M). Predictions for elite, globally-recognized players tend to be less reliable, since their value is driven by brand and marketing factors not captured in performance stats. See Known Limitations for details.")
+models = pd.DataFrame(m["models"]).rename(columns={"R^2": "R²", "RMSE": "RMSE (log)"})
+st.dataframe(models.style.format({"RMSE (log)": "{:.3f}", "R²": "{:.3f}"}), hide_index=True, width='stretch')
+st.caption(f"Final model: tuned Gradient Boosting. Hold-out R² = {m['holdout_r2']:.3f}. Data: Transfermarkt snapshot from July 2026.")
+
+st.markdown("**How to read a residual:** residual = log(real value) − log(predicted value). "
+            "−0.7 means the market price is about half of what the stats suggest (undervalued), +0.7 means about double (overvalued). "
+            "Use the **Rankings** page for top lists and **Player Search** for a single player.")
 st.subheader("Notable players in this dataset")
 featured_names = ["Erling Haaland", "Jude Bellingham", "Harry Kane", "Federico Valverde"]
 cols = st.columns(len(featured_names))
@@ -58,6 +58,7 @@ for col, name in zip(cols, featured_names):
     with col:
         if not player_rows.empty:
             player = player_rows.iloc[0]
-            st.metric(name, f"€{player['current_value']:,.0f}", f"{player['position']}, age {player['age']:.0f}")
+            st.metric(name, f"€{player['current_value']:,.0f}")
+            st.caption(f"{player['position']}, age {player['age']:.0f}")
         else:
             st.info(f"{name} not found in dataset")
