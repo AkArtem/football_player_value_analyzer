@@ -10,7 +10,7 @@ def load_data():
     df = pd.read_csv(os.path.join(APP_ROOT,"dashboard_data.csv"))
     df["value_group"] = pd.qcut(df["current_value"], 5, labels=["<0.4M", "0.4-0.9M", "0.9-2.5M", "2.5-8M", ">8M"])
     df["pct_in_group"] = df.groupby("value_group", observed=True)["residual"].rank(pct=True)
-    df["note"] = df.apply(lambda row: "; ".join(flags(row)), axis=1)
+    df["note"] = df.apply(lambda row: "; ".join(flags(row)) if abs(row["residual"]) > 0.7 else "", axis=1)
     return df
 
 @st.cache_data
@@ -27,7 +27,7 @@ DATA_NOTE = "Valuations mostly from December 2025 (Transfermarkt data, downloade
 
 def fmt_eur(x):
     """€4.6M / €850K instead of €4,563,346 (the model is not precise to the euro)."""
-    if x >= 1_000_000:
+    if round(x / 1_000) >= 1_000:
         return f"€{x / 1_000_000:.1f}M"
     return f"€{x / 1_000:.0f}K"
 

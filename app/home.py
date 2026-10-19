@@ -38,7 +38,8 @@ col1, col2, col3, col4 = st.columns(4)
 col1.metric("Players analyzed", len(filtered))
 col2.metric("Avg market value", fmt_eur(filtered['current_value'].mean()))
 most_undervalued = filtered.loc[filtered['residual'].idxmin()]
-col3.metric("Biggest gap below estimate", most_undervalued['name'], f"residual {most_undervalued['residual']:.2f}", delta_color="off")
+col3.metric("Biggest gap below estimate", most_undervalued['name'])
+col3.caption(f"residual {most_undervalued['residual']:.2f}")
 col4.metric("Model R² (5-fold CV)", f"{m['cv_r2']:.3f}")
 
 st.markdown("---")

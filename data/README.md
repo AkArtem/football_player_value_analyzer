@@ -1,15 +1,27 @@
 # Data
 Source: https://www.kaggle.com/datasets/davidcariboo/player-scores
 
-Files used in project:
-- appearances.csv
-- player_valuations.csv
-- players.csv
-- games.csv
-- competitions.csv
-- clubs.csv
+Not committed due to file size. Download the dataset and unzip all CSV files into this `data/` folder:
 
-Not committed due to file size.
+```bash
+pip install kaggle
+kaggle datasets download -d davidcariboo/player-scores -p data --unzip
+```
+
+Or download the ZIP manually from the Kaggle page and unzip it here.
+
+| Notebook | Raw files it reads |
+|---|---|
+| 01_data_overview | all raw tables (overview only) |
+| 02_data_check | player_valuations.csv, players.csv |
+| 03_features | appearances.csv, players.csv (+ player_values_fresh.csv from 02) |
+| 04_check | appearances.csv, games.csv, players.csv (+ outputs of 03) |
+| 05_sql | appearances.csv, players.csv, player_valuations.csv, competitions.csv (+ outputs of 03/04) |
+| 06_eda | players_fresh_final.csv (output of 04) |
+| 07_modeling | appearances.csv, games.csv, competitions.csv (+ players_fresh_final.csv) |
+| 08_sensitivity | appearances.csv, competitions.csv, player_valuations.csv, players.csv |
+
+Run the notebooks in order (01 → 08); later notebooks use CSVs written by earlier ones. The app and the tests only need `app/dashboard_data.csv` and `app/metrics.json`, which are committed.
 
 # Data snapshot
 

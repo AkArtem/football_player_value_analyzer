@@ -22,7 +22,7 @@ def test_no_matches_after_valuation():
     assert len(result) == 3
     assert (result["date"] <= result["current_date"]).all()
 
-def test_recent_window_drops_all_matches():
+def test_recent_window_drops_old_matches():
     apps = pd.DataFrame({
         "player_id": [1, 1, 2, 2],
         "date": pd.to_datetime(["2024-10-01", "2025-09-01", "2024-11-01", "2025-08-01"]),
@@ -50,14 +50,40 @@ def test_league_tier_mapping():
     assert result[3] == 3
     
 def test_per90_zero_minutes():
-    df = pd.DataFrame({
-        "player_id": [3, 2, 1],
-        "minutes_played": [150, 0, 0]
-    })
-    result = per90(df["minutes_played"], df["minutes_played"])
-    assert result[0] == 90
+    goals = pd.Series([2, 1, 0])
+    minutes = pd.Series([180, 0, 0])
+    result = per90(goals, minutes)
+    assert result[0] == 1
     assert result[1] == 0
     assert result[2] == 0
+
+def test_cup_only_player_has_no_main_league():
+    apps_recent = pd.DataFrame({
+        "player_id": [1, 2],
+        "competition_id": ["CL", "GB1"],
+        "minutes_played": [900, 900]
+    })
+    competitions = pd.DataFrame({
+        "competition_id": ["CL", "GB1"],
+        "type": ["international_cup", "domestic_league"]
+    })
+    result = main_league_tier(apps_recent, competitions)
+    assert 1 not in result["player_id"].values
+    assert 2 in result["player_id"].values
+
+def test_tie_in_minutes_gives_one_main_league():
+    apps_recent = pd.DataFrame({
+        "player_id": [1, 1],
+        "competition_id": ["NL1", "BE1"],
+        "minutes_played": [450, 450]
+    })
+    competitions = pd.DataFrame({
+        "competition_id": ["NL1", "BE1"],
+        "type": ["domestic_league", "domestic_league"]
+    })
+    result = main_league_tier(apps_recent, competitions)
+    assert len(result) == 1
+    assert result["league_tier"].iloc[0] == 2
     
 def test_dashboard_data():
     df = pd.read_csv(os.path.join(ROOT, "app", "dashboard_data.csv"))
